@@ -14,6 +14,8 @@ namespace QAI.LogIn
         [HideInInspector] public UnityEvent onLogout;
 
 
+        public UserProfile UserProfile { get; private set; }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
         private static extern void TriggerAutoGamesLogin();
@@ -51,7 +53,7 @@ namespace QAI.LogIn
         // payload = JSON string of the profile or an empty string on logout
         public void OnAuthStateChanged(string payloadJson)
         {
-            Debug.Log($"===== {payloadJson}");
+            Debug.Log($"[Unity] Receive Auth: {payloadJson}");
 
             if (string.IsNullOrEmpty(payloadJson))
             {
@@ -77,6 +79,8 @@ namespace QAI.LogIn
         private async void HandleLoggedIn(UserProfile profile)
         {
             await Awaitable.EndOfFrameAsync();
+
+            UserProfile = profile;
 
             onLogin?.Invoke(profile);
         }
