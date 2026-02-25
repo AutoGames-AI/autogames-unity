@@ -1,5 +1,7 @@
 using System;
+#if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
+#endif
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -19,6 +21,8 @@ namespace QAI.LogIn
         private static extern void TriggerAutoGamesLogin();
         [DllImport("__Internal")]
         private static extern void TriggerAutoGamesLogout();
+        [DllImport("__Internal")]
+        private static extern string GetAccessTokenJS();
 #endif
 
         private void Awake()
@@ -40,7 +44,7 @@ namespace QAI.LogIn
         public void OnLogoutButtonClicked()
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
-        TriggerAutoGamesLogout();
+            TriggerAutoGamesLogout();
 #else
             Debug.Log("Logout (editor)");
             OnAuthStateChanged("");
@@ -51,8 +55,6 @@ namespace QAI.LogIn
         // payload = JSON string of the profile or an empty string on logout
         public void OnAuthStateChanged(string payloadJson)
         {
-            Debug.Log($"===== {payloadJson}");
-
             if (string.IsNullOrEmpty(payloadJson))
             {
                 Debug.Log("User logged out");
@@ -79,11 +81,32 @@ namespace QAI.LogIn
             await Awaitable.EndOfFrameAsync();
 
             onLogin?.Invoke(profile);
+
+            PrintToken();
         }
 
         private void HandleLoggedOut()
         {
             onLogout?.Invoke();
+        }
+
+        public string GetAccessToken()
+        {
+#if UNITY_WEBGL && !UNITY_EDITOR
+            return GetAccessTokenJS();
+#else
+            return "В юньке его нет :(";
+#endif
+        }
+
+        public async void PrintToken()
+        {
+            await Awaitable.WaitForSecondsAsync(1f);
+
+#if UNITY_WEBGL && !UNITY_EDITOR
+            string token = GetAccessTokenJS();
+            Debug.Log(token != null ? $"Токен: {token}" : "Токена нэт");
+#endif
         }
 
 #if UNITY_EDITOR
