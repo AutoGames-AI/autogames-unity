@@ -16,6 +16,8 @@ namespace QAI.LogIn
         [HideInInspector] public UnityEvent onLogout;
 
 
+        public UserProfile UserProfile { get; private set; }
+
 #if UNITY_WEBGL && !UNITY_EDITOR
         [DllImport("__Internal")]
         private static extern void TriggerAutoGamesLogin();
@@ -79,6 +81,8 @@ namespace QAI.LogIn
         private async void HandleLoggedIn(UserProfile profile)
         {
             await Awaitable.EndOfFrameAsync();
+
+            UserProfile = profile;
 
             onLogin?.Invoke(profile);
 
