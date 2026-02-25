@@ -109,7 +109,7 @@ namespace QAI.LogIn
 
 #if UNITY_WEBGL && !UNITY_EDITOR
             string token = GetAccessTokenJS();
-            Debug.Log(token != null ? $"Токен: {token}" : "Токена нэт");
+            Debug.Log(token != null ? $"Access Token: {token}" : "Token not foundoken");
 #endif
         }
 
