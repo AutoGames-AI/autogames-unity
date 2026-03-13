@@ -1,9 +1,12 @@
 using System;
-#if UNITY_WEBGL && !UNITY_EDITOR
+using System.Collections;
+using System.Text;
+//#if UNITY_WEBGL && !UNITY_EDITOR
 using System.Runtime.InteropServices;
-#endif
+//#endif
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.Networking;
 
 namespace QAI.LogIn
 {
@@ -23,9 +26,11 @@ namespace QAI.LogIn
         private static extern void TriggerAutoGamesLogin();
         [DllImport("__Internal")]
         private static extern void TriggerAutoGamesLogout();
+        
+#endif
+
         [DllImport("__Internal")]
         private static extern string GetAccessTokenJS();
-#endif
 
         private void Awake()
         {
@@ -94,14 +99,17 @@ namespace QAI.LogIn
             onLogout?.Invoke();
         }
 
-        public string GetAccessToken()
+        public async Awaitable<string> GetAccessToken()
         {
+            await RefreshTokenAsync(GetAccessTokenJS());
+
 #if UNITY_WEBGL && !UNITY_EDITOR
             return GetAccessTokenJS();
 #else
             return "В юньке его нет :(";
 #endif
         }
+
 
         public async void PrintToken()
         {
@@ -126,7 +134,50 @@ namespace QAI.LogIn
             }
         }
 #endif
-        
+
+        private const string RefreshUrl = "https://api.dev.autogames.app/sso/refresh-token";
+
+        // Класс для структуры запроса (если нужен JSON в теле)
+        [System.Serializable]
+        public class RefreshRequest
+        {
+            public string refresh_token;
+        }
+
+        public async Awaitable RefreshTokenAsync(string oldToken)
+        {
+            var data = new RefreshRequest { refresh_token = oldToken };
+            string json = JsonUtility.ToJson(data);
+
+            using (UnityWebRequest request = new UnityWebRequest(RefreshUrl, "POST"))
+            {
+                byte[] bodyRaw = Encoding.UTF8.GetBytes(json);
+                request.uploadHandler = new UploadHandlerRaw(bodyRaw);
+                request.downloadHandler = new DownloadHandlerBuffer();
+
+                request.SetRequestHeader("Content-Type", "application/json");
+                request.SetRequestHeader("Authorization", "Bearer " + oldToken);
+
+                // В Unity можно дождаться окончания UnityWebRequestAsyncOperation с помощью await
+                var operation = request.SendWebRequest();
+
+                while (!operation.isDone)
+                {
+                    await Awaitable.NextFrameAsync(); // Ждем следующего кадра, чтобы не блокировать основной поток
+                }
+
+                if (request.result == UnityWebRequest.Result.Success)
+                {
+                    Debug.Log("Токен успешно обновлен: " + request.downloadHandler.text);
+                    // Тут парсишь новый токен и сохраняешь его
+                }
+                else
+                {
+                    Debug.LogError("Ошибка обновления токена: " + request.error);
+                }
+            }
+        }
+
     }
 
     [Serializable]
