@@ -141,12 +141,12 @@ namespace QAI.LogIn
         [System.Serializable]
         public class RefreshRequest
         {
-            public string refresh_token;
+            //public string refresh_token;
         }
 
         public async Awaitable RefreshTokenAsync(string oldToken)
         {
-            var data = new RefreshRequest { refresh_token = oldToken };
+            var data = new RefreshRequest { };
             string json = JsonUtility.ToJson(data);
 
             using (UnityWebRequest request = new UnityWebRequest(RefreshUrl, "POST"))
@@ -156,7 +156,7 @@ namespace QAI.LogIn
                 request.downloadHandler = new DownloadHandlerBuffer();
 
                 request.SetRequestHeader("Content-Type", "application/json");
-                request.SetRequestHeader("Authorization", "Bearer " + oldToken);
+                //request.SetRequestHeader("Authorization", "Bearer " + oldToken);
 
                 // В Unity можно дождаться окончания UnityWebRequestAsyncOperation с помощью await
                 var operation = request.SendWebRequest();
@@ -173,7 +173,7 @@ namespace QAI.LogIn
                 }
                 else
                 {
-                    Debug.LogError("Ошибка обновления токена: " + request.error);
+                    Debug.LogError("Token refresh error: " + request.error);
                 }
             }
         }
