@@ -17,7 +17,7 @@ namespace QAI.LogIn
 
         public UserProfile UserProfile { get; private set; }
 
-        // Используем TaskCompletionSource для превращения callback-системы в awaitable
+        // РСЃРїРѕР»СЊР·СѓРµРј TaskCompletionSource РґР»СЏ РїСЂРµРІСЂР°С‰РµРЅРёСЏ callback-СЃРёСЃС‚РµРјС‹ РІ awaitable
         private TaskCompletionSource<string> _tokenRequestSource;
 
 #if UNITY_WEBGL && !UNITY_EDITOR
@@ -71,7 +71,7 @@ namespace QAI.LogIn
                 UserProfile = profile;
                 onLogin?.Invoke(profile);
 
-                // Пример асинхронного получения после логина
+                // РџСЂРёРјРµСЂ Р°СЃРёРЅС…СЂРѕРЅРЅРѕРіРѕ РїРѕР»СѓС‡РµРЅРёСЏ РїРѕСЃР»Рµ Р»РѕРіРёРЅР°
                 _ = PrintTokenAsync();
             }
             catch (Exception e)
@@ -80,7 +80,7 @@ namespace QAI.LogIn
             }
         }
 
-        // Метод, который вызывает JS через SendMessage
+        // РњРµС‚РѕРґ, РєРѕС‚РѕСЂС‹Р№ РІС‹Р·С‹РІР°РµС‚ JS С‡РµСЂРµР· SendMessage
         public void OnAccessTokenReceived(string token)
         {
             if (_tokenRequestSource != null)
@@ -93,7 +93,7 @@ namespace QAI.LogIn
         public async Task<string> GetAccessToken()
         {
 #if UNITY_WEBGL && !UNITY_EDITOR
-            // Если запрос уже идет, ждем его
+            // Р•СЃР»Рё Р·Р°РїСЂРѕСЃ СѓР¶Рµ РёРґРµС‚, Р¶РґРµРј РµРіРѕ
             if (_tokenRequestSource != null) return await _tokenRequestSource.Task;
 
             _tokenRequestSource = new TaskCompletionSource<string>();
@@ -101,7 +101,7 @@ namespace QAI.LogIn
             
             return await _tokenRequestSource.Task;
 #else
-            return "В юньке его нет :(";
+            return "Р’ СЋРЅСЊРєРµ РµРіРѕ РЅРµС‚ :(";
 #endif
         }
 
