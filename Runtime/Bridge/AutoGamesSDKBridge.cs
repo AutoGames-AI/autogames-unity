@@ -14,6 +14,7 @@ namespace QAI
 
         public VotingsDto VotingsResult { get; private set; }
 
+#if !UNITY_EDITOR && UNITY_WEBGL
         [DllImport("__Internal")]
         private static extern void FetchVotingsFromJS(int tokenId);
 
@@ -22,7 +23,7 @@ namespace QAI
 
         [DllImport("__Internal")]
         private static extern void FetchUserAssetsFromJS(string profileId);
-
+#endif
         public UnityEvent<VotingsDto> onVotingsReceive;
         public UnityEvent onVoteSuccess;
 
